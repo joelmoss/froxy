@@ -1,4 +1,6 @@
-require "froxy/version"
+# frozen_string_literal: true
+
+require 'froxy/version'
 
 module Froxy
   class Error < StandardError; end
