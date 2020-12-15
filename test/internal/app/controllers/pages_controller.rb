@@ -1,3 +1,5 @@
 class PagesController < ApplicationController
-  # self.side_load_assets = true
+  def nothing_to_side_load
+    render layout: 'nothing_to_side_load'
+  end
 end

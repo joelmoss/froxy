@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Froxy Test</title>
+    <%= yield :side_loaded_css %>
+  </head>
+  <body>
+    <%= yield %>
+    <%= yield :side_loaded_js %>
+  </body>
+</html>

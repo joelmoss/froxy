@@ -25,10 +25,29 @@ module Froxy
           path = tpl.short_identifier.delete_suffix('.html.erb')
 
           instrument :side_loaded_assets, identifier: tpl.identifier, asset_types: [] do |payload|
-            view.content_for :side_loaded_css do
-              view.stylesheet_link_tag(path).tap do |tag|
-                !tag.nil? && (payload[:asset_types] << :css)
-              end
+            side_load_js path, view, payload
+            side_load_css path, view, payload
+          end
+        end
+
+        def side_load_js(path, view, log_payload)
+          # Check that the file actually exists.
+          return unless Rails.root.join(path).sub_ext('.js').exist?
+
+          view.content_for :side_loaded_js do
+            view.javascript_include_tag(path).tap do |tag|
+              !tag.nil? && (log_payload[:asset_types] << :js)
+            end
+          end
+        end
+
+        def side_load_css(path, view, log_payload)
+          # Check that the file actually exists.
+          return unless Rails.root.join(path).sub_ext('.css').exist?
+
+          view.content_for :side_loaded_css do
+            view.stylesheet_link_tag(path).tap do |tag|
+              !tag.nil? && (log_payload[:asset_types] << :css)
             end
           end
         end

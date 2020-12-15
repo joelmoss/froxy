@@ -4,14 +4,8 @@ module Froxy
   module Helper
     include ActionView::Helpers::AssetUrlHelper
 
-    ASSET_PUBLIC_DIRECTORIES = {
-      javascript: '/froxy',
-      stylesheet: '/froxy'
-    }.freeze
-
-    def compute_asset_path(source, options = {})
-      dir = ASSET_PUBLIC_DIRECTORIES[options[:type]] || ''
-      File.join(dir, source)
+    def compute_asset_path(source, _options = {})
+      File.join('', source)
     end
   end
 end
