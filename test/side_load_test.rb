@@ -3,13 +3,17 @@
 require 'test_helper'
 
 class SideLoadTest < ActionDispatch::IntegrationTest
-  test 'layout' do
+  test 'layout and view' do
     get '/'
 
-    assert_match '<link rel="stylesheet" media="screen" href="/app/views/layouts/application.css" />',
-                 response.body
-    assert_match '<script src="/app/views/layouts/application.js"></script>',
-                 response.body
+    assert_select 'head' do
+      assert_select 'link:nth(1)[href=?]', '/app/views/layouts/application.css'
+      assert_select 'link:nth(2)[href=?]', '/app/views/pages/home.css'
+    end
+    assert_select 'body' do
+      assert_select 'script:nth(1)[src=?]', '/app/views/layouts/application.js'
+      assert_select 'script:nth(2)[src=?]', '/app/views/pages/home.js'
+    end
   end
 
   test 'nothing to side load' do

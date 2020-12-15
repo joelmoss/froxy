@@ -14,7 +14,7 @@ module Froxy
           end
 
           # Side load view assets - if any.
-          # side_load_assets view, template
+          side_load_assets view, template
 
           super
         end
