@@ -7,6 +7,7 @@ gemspec
 
 gem 'combustion', '~> 1.3'
 gem 'minitest', '~> 5.0'
+gem 'minitest-focus'
 gem 'rake', '~> 12.0'
 gem 'rubocop', require: false
 gem 'rubocop-minitest', require: false
