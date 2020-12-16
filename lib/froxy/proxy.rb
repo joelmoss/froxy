@@ -6,6 +6,8 @@ require 'rack/utils'
 # Proxies files to esbuild.
 module Froxy
   class Proxy
+    ESBUILD = ['esbuild', '--color=false', '--error-limit=1'].freeze
+
     def initialize(app)
       @app = app
     end
@@ -14,19 +16,15 @@ module Froxy
       req = Rack::Request.new(env)
       path_info = req.path_info
 
-      return unless (path = clean_path(path_info))
+      if (req.get? || req.head?) && /\.(js|css)$/i.match?(path_info)
+        return unless (path = clean_path(path_info))
 
-      if (req.get? || req.head?) && /\.(js|css)$/i.match?(path)
-        output = build(path, '--sourcemap')
-
-        if output
+        if (output = build(path, '--sourcemap')).is_a?(Rack::Response)
           req.path_info = path
-
-          response = Rack::Response.new(output)
-          response.content_type = content_type_for(path)
-
-          return response.finish
+          return output.finish
         end
+
+        return [404, {}, []] if output == :not_found
       end
 
       @app.call req.env
@@ -35,26 +33,28 @@ module Froxy
     private
 
     def build(path, *options)
-      full_path = Rails.root.join(path.delete_prefix('/').b)
+      return :not_found unless file_readable?(path)
 
-      return false unless file_readable?(full_path)
-
-      cmd = ['esbuild'].concat(options)
-      cmd << full_path.relative_path_from(Rails.root)
+      cmd = ESBUILD + options
+      cmd << path.delete_prefix('/')
 
       stdout, stderr, status = run(cmd)
 
       if status.success?
         Rails.logger.info "[froxy] built #{path}"
-        Rails.logger.error stderr.to_s unless stderr.empty?
+        raise "[froxy] build failed: #{stderr}" unless stderr.empty?
 
-        stdout
+        build_response path, stdout
       else
         non_empty_streams = [stdout, stderr].delete_if(&:empty?)
-        Rails.logger.error "[froxy] build failed:\n#{non_empty_streams.join("\n\n")}"
-
-        false
+        raise "[froxy] build failed:\n#{non_empty_streams.join("\n\n")}"
       end
+    end
+
+    def build_response(path, body)
+      response = Rack::Response.new(body)
+      response.content_type = content_type_for(path)
+      response
     end
 
     def content_type_for(path)
@@ -66,7 +66,8 @@ module Froxy
     end
 
     def file_readable?(path)
-      file_stat = File.stat(path.to_s)
+      path = Rails.root.join(path.delete_prefix('/').b).to_s
+      file_stat = File.stat(path)
     rescue SystemCallError
       false
     else
