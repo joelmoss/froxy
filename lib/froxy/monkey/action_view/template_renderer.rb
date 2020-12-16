@@ -35,7 +35,7 @@ module Froxy
           return unless Rails.root.join(path).sub_ext('.js').exist?
 
           view.content_for :side_loaded_js do
-            view.javascript_include_tag(path).tap do |tag|
+            view.javascript_include_tag(path, type: :module).tap do |tag|
               !tag.nil? && (log_payload[:asset_types] << :js)
             end
           end
