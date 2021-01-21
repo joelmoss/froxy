@@ -5,6 +5,6 @@ require 'froxy/log_subscriber'
 require 'froxy/railtie'
 
 module Froxy
-  class Error < StandardError; end
-  # Your code goes here...
+  mattr_accessor :esbuild
+  @@esbuild = false
 end

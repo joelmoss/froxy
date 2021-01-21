@@ -7,9 +7,11 @@ require 'rack/utils'
 module Froxy
   class Proxy
     ESBUILD = ['esbuild', '--color=false', '--error-limit=1'].freeze
+    ESBUILD_BUNDLE_OPTS = ['--bundle', '--format=esm'].freeze
 
     def initialize(app)
       @app = app
+      @file_server = Rack::Files.new(Rails.root)
     end
 
     def call(env)
@@ -18,13 +20,15 @@ module Froxy
 
       if (req.get? || req.head?) && /\.(js|css)$/i.match?(path_info)
         return unless (path = clean_path(path_info))
+        return [404, {}, []] unless file_readable?(path)
 
-        if (output = build(path, '--sourcemap')).is_a?(Rack::Response)
+        if !Froxy.esbuild
+          req.path_info = path
+          return @file_server.call(env)
+        elsif (output = build(path, '--sourcemap')).is_a?(Rack::Response)
           req.path_info = path
           return output.finish
         end
-
-        return [404, {}, []] if output == :not_found
       end
 
       @app.call req.env
@@ -32,9 +36,8 @@ module Froxy
 
     private
 
+    # Build the file from the given path using ESbuild. Returns the Rack::Response.
     def build(path, *options)
-      return :not_found unless file_readable?(path)
-
       cmd = ESBUILD + options
       cmd << path.delete_prefix('/')
 
@@ -44,14 +47,14 @@ module Froxy
         Rails.logger.info "[froxy] built #{path}"
         raise "[froxy] build failed: #{stderr}" unless stderr.empty?
 
-        build_response path, stdout
+        response_from_build path, stdout
       else
         non_empty_streams = [stdout, stderr].delete_if(&:empty?)
         raise "[froxy] build failed:\n#{non_empty_streams.join("\n\n")}"
       end
     end
 
-    def build_response(path, body)
+    def response_from_build(path, body)
       response = Rack::Response.new(body)
       response.content_type = content_type_for(path)
       response
@@ -75,8 +78,8 @@ module Froxy
     end
 
     def clean_path(path_info)
-      path = ::Rack::Utils.unescape_path path_info.chomp('/')
-      ::Rack::Utils.clean_path_info path if ::Rack::Utils.valid_path? path
+      path = Rack::Utils.unescape_path path_info.chomp('/')
+      Rack::Utils.clean_path_info path if Rack::Utils.valid_path? path
     end
   end
 end

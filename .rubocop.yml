@@ -2,3 +2,5 @@ Style/LineLength:
   Max: 100
 Style/Documentation:
   Enabled: false
+Style/ClassVars:
+  Enabled: false
