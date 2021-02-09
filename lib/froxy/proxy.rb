@@ -6,12 +6,10 @@ require 'rack/utils'
 # Proxies files to esbuild.
 module Froxy
   class Proxy
-    ESBUILD = ['esbuild', '--color=false', '--error-limit=1'].freeze
-    ESBUILD_BUNDLE_OPTS = ['--bundle', '--format=esm'].freeze
+    CLI = 'bin/froxy'
 
     def initialize(app)
       @app = app
-      @file_server = Rack::Files.new(Rails.root)
     end
 
     def call(env)
@@ -20,13 +18,10 @@ module Froxy
 
       if (req.get? || req.head?) && /\.(js|css)$/i.match?(path_info)
         return unless (path = clean_path(path_info))
+
         return [404, {}, []] unless file_readable?(path)
 
-        if !Froxy.esbuild
-          req.path_info = path
-          return @file_server.call(env)
-        elsif (output = build(path, '--sourcemap')).is_a?(Rack::Response)
-          req.path_info = path
+        if (output = build(path)).is_a?(Rack::Response)
           return output.finish
         end
       end
@@ -36,12 +31,9 @@ module Froxy
 
     private
 
-    # Build the file from the given path using ESbuild. Returns the Rack::Response.
-    def build(path, *options)
-      cmd = ESBUILD + options
-      cmd << path.delete_prefix('/')
-
-      stdout, stderr, status = run(cmd)
+    # Build the file from the given `path` using ESbuild. Returns the Rack::Response.
+    def build(path)
+      stdout, stderr, status = Open3.capture3([CLI, Rails.root, path].join(' '))
 
       if status.success?
         Rails.logger.info "[froxy] built #{path}"
@@ -61,16 +53,11 @@ module Froxy
     end
 
     def content_type_for(path)
-      ::Rack::Mime.mime_type(::File.extname(path), nil) || 'text/plain'
-    end
-
-    def run(cmd)
-      Open3.capture3(cmd.join(' '), chdir: Rails.root)
+      Rack::Mime.mime_type(::File.extname(path), nil) || 'text/plain'
     end
 
     def file_readable?(path)
-      path = Rails.root.join(path.delete_prefix('/').b).to_s
-      file_stat = File.stat(path)
+      file_stat = File.stat(Rails.root.join(path.delete_prefix('/').b).to_s)
     rescue SystemCallError
       false
     else
@@ -78,7 +65,7 @@ module Froxy
     end
 
     def clean_path(path_info)
-      path = Rack::Utils.unescape_path path_info.chomp('/')
+      path = Rack::Utils.unescape_path path_info.chomp('/').delete_prefix('/')
       Rack::Utils.clean_path_info path if Rack::Utils.valid_path? path
     end
   end

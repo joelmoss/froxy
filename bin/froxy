@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+const path = require("path");
+const cli = require("cac")();
+const esbuild = require("esbuild");
+
+const parsed = cli.parse();
+const [absWorkingDir, ...entryPoints] = parsed.args;
+
+let resolvePlugin = {
+  name: "root",
+  setup(build) {
+    // Rewrite all paths starting with "/" to Rails.root
+    build.onResolve({ filter: /^\//, namespace: "file" }, (args) => {
+      // console.log(args);
+
+      // if (args.path.endsWith(".css") && args.importer.endsWith(".js")) {
+      //   // return { external: true };
+      // }
+
+      return { path: path.join(absWorkingDir, args.path) };
+    });
+  },
+};
+
+esbuild
+  .build({
+    entryPoints,
+    absWorkingDir,
+    bundle: true,
+    format: "esm",
+    write: false,
+    outdir: "tst",
+    plugins: [resolvePlugin],
+  })
+  .then((result) => {
+    // console.log(result);
+    // console.log(result.outputFiles[1].text);
+    process.stdout.write(result.outputFiles[0].text);
+  })
+  .catch(() => process.exit(1));

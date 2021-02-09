@@ -6,5 +6,5 @@ require 'froxy/railtie'
 
 module Froxy
   mattr_accessor :esbuild
-  @@esbuild = false
+  @@esbuild = true
 end
