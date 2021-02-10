@@ -8,16 +8,31 @@ const parsed = cli.parse();
 const [absWorkingDir, ...entryPoints] = parsed.args;
 
 let resolvePlugin = {
-  name: "root",
+  name: "resolver",
   setup(build) {
-    // Rewrite all paths starting with "/" to Rails.root
+    // Handles CSS imports from JS (eg `import from 'some.css'`) by simply marking it as external.
+    // This then allows the browser to handle the import. However, browsers do not yet support
+    // importing non-JS assets, and will not include the CSS. So the Froxy proxy will return the
+    // imported CSS as a JS file that inserts the CSS directly into the DOM. This unfortunately may
+    // result in a flash of unstyled content (FOUC).
+    //
+    // --- OR
+    //
+    // esbuild returns the content of both the JS and CSS. Then Froxy returns the JS as normal,
+    // and additionally includes the CSS directly into the rendered HTML. This way, there will be no
+    // FOUC. But this method is a little more complex, as Froxy will need to somehow pass the CSS
+    // content to Rails for insertion into the rendered view.
+    build.onResolve({ filter: /\.css$/, namespace: "file" }, (args) => {
+      if (args.path.endsWith(".css") && args.importer.endsWith(".js")) {
+        return { external: true };
+      }
+    });
+
+    // Resolves paths starting with a `/` to the Rails root.
+    //
+    // Example:
+    //  import '/my/lib.js' //-> import '{Rails.root}/my/lib.js'
     build.onResolve({ filter: /^\//, namespace: "file" }, (args) => {
-      // console.log(args);
-
-      // if (args.path.endsWith(".css") && args.importer.endsWith(".js")) {
-      //   // return { external: true };
-      // }
-
       return { path: path.join(absWorkingDir, args.path) };
     });
   },
@@ -34,8 +49,6 @@ esbuild
     plugins: [resolvePlugin],
   })
   .then((result) => {
-    // console.log(result);
-    // console.log(result.outputFiles[1].text);
     process.stdout.write(result.outputFiles[0].text);
   })
   .catch(() => process.exit(1));
