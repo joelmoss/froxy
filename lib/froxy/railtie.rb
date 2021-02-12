@@ -10,6 +10,7 @@ module Froxy
       options = app.config.froxy
 
       options.use_proxy = true if options.use_proxy.nil?
+      options.use_esbuild = true if options.use_esbuild.nil?
       options.side_load_assets = true if options.side_load_assets.nil?
     end
 

@@ -10,6 +10,7 @@ module Froxy
 
     def initialize(app)
       @app = app
+      @file_server = Rack::Files.new(Rails.root)
     end
 
     def call(env)
@@ -20,6 +21,8 @@ module Froxy
         return unless (path = clean_path(path_info))
 
         return [404, {}, []] unless file_readable?(path)
+
+        return @file_server.call(env) unless Rails.application.config.froxy.use_esbuild
 
         if (output = build(path)).is_a?(Rack::Response)
           return output.finish
