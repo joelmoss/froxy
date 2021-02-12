@@ -6,7 +6,7 @@ module Froxy
   class LogSubscriber < ActiveSupport::LogSubscriber
     VIEWS_PATTERN = %r{^app/views/}.freeze
 
-    def render_side_loaded_assets(event)
+    def side_loaded_assets(event)
       return if (asset_types = event.payload[:asset_types]).empty?
 
       identifier_from_root = from_rails_root(event.payload[:identifier])

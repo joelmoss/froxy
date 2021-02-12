@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'froxy/log_subscriber'
+
 module Froxy
   module Monkey
     module SideLoadAssets

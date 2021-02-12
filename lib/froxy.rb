@@ -6,7 +6,6 @@ require 'active_support/dependencies/autoload'
 module Froxy
   extend ActiveSupport::Autoload
 
-  autoload :LogSubscriber
   autoload :Proxy
 end
 
