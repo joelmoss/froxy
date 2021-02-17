@@ -6,7 +6,7 @@ require 'rack/utils'
 # Proxies files to esbuild.
 module Froxy
   class Proxy
-    CLI = 'bin/froxy'
+    CLI = File.expand_path('../../bin/froxy', __dir__)
 
     def initialize(app)
       @app = app
@@ -24,6 +24,8 @@ module Froxy
       # Let esbuild handle JS and CSS.
       if (req.get? || req.head?) && /\.(js|css)$/i.match?(path_info)
         return unless (path = clean_path(path_info))
+
+        # Rails.logger.tagged('froxy') { Rails.logger.info "1: #{path} #{path_info}" }
 
         return [404, {}, []] unless file_readable?(path)
 
@@ -43,7 +45,7 @@ module Froxy
 
     # Build the file from the given `path` using ESbuild. Returns a Rack::Response.
     def build(path)
-      stdout, stderr, status = Open3.capture3([CLI, Rails.root, path].join(' '))
+      stdout, stderr, status = Open3.capture3(CLI, Rails.root.to_s, path)
 
       if status.success?
         Rails.logger.info "[froxy] built #{path}"
