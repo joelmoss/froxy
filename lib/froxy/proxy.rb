@@ -17,8 +17,12 @@ module Froxy
       req = Rack::Request.new(env)
       path_info = req.path_info
 
-      return @file_server.call(env) if (req.get? || req.head?) && /\.(png)$/i.match?(path_info)
+      # Let images through.
+      if (req.get? || req.head?) && /\.(png|gif|jpe?g|svg|ico|webp|avif)$/i.match?(path_info)
+        return @file_server.call(env)
+      end
 
+      # Let esbuild handle JS and CSS.
       if (req.get? || req.head?) && /\.(js|css)$/i.match?(path_info)
         return unless (path = clean_path(path_info))
 
