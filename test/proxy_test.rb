@@ -7,14 +7,71 @@ class ProxyTest < ActionDispatch::IntegrationTest
     get '/app/views/layouts/application.css'
 
     assert_equal 'text/css', response.headers['Content-Type']
-    assert_match "body {\n  color: red;\n}\n", response.body
+    assert_equal %(
+      /* app/views/layouts/application.css */
+      body {
+        color: red;
+      }
+    ).squish, response.body.squish
+  end
+
+  test 'stylesheet with @import' do
+    get '/lib/with_import.css'
+
+    assert_equal 'text/css', response.headers['Content-Type']
+    assert_equal %(
+      /* lib/reset.css */
+      body {
+        font-size: 16px;
+      }
+      /* app/views/layouts/application.css */
+      body {
+        color: red;
+      }
+      /* lib/with_import.css */
+      body {
+        color: red;
+      }
+    ).squish, response.body.squish
   end
 
   test 'javascript' do
     get '/app/views/layouts/application.js'
 
     assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match 'console.log("app/views/layouts/application.js");', response.body
+    assert_equal %(
+      // app/views/layouts/application.js
+      console.log("app/views/layouts/application.js");
+    ).squish, response.body.squish
+  end
+
+  test 'javascript with import' do
+    get '/lib/with_import.js'
+
+    assert_equal 'application/javascript', response.headers['Content-Type']
+    assert_equal %(
+      // app/views/layouts/application.js
+      console.log("app/views/layouts/application.js");
+
+      // lib/common.js
+      console.log("lib/common.js");
+
+      // lib/with_import.js
+      console.log("/lib/with_import.js");
+    ).squish, response.body.squish
+  end
+
+  test 'javascript with css import' do
+    get '/lib/with_css_import.js'
+
+    assert_equal 'application/javascript', response.headers['Content-Type']
+    assert_match %(
+      // lib/reset.css
+      loadStyle_default("/lib/reset.css");
+
+      // lib/with_css_import.js
+      console.log("/lib/with_css_import.js");
+    ).squish, response.body.squish
   end
 
   test 'stylesheet not found' do

@@ -17,7 +17,7 @@ module Froxy
     initializer 'froxy.proxy' do |app|
       next unless app.config.froxy.use_proxy
 
-      app.middleware.insert_before ActionDispatch::Static, Froxy::Proxy
+      app.middleware.insert_after ActionDispatch::Static, Froxy::Proxy
     end
 
     initializer 'froxy.side_load_assets' do |app|

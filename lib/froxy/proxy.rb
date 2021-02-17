@@ -17,6 +17,8 @@ module Froxy
       req = Rack::Request.new(env)
       path_info = req.path_info
 
+      return @file_server.call(env) if (req.get? || req.head?) && /\.(png)$/i.match?(path_info)
+
       if (req.get? || req.head?) && /\.(js|css)$/i.match?(path_info)
         return unless (path = clean_path(path_info))
 
@@ -24,8 +26,15 @@ module Froxy
 
         return @file_server.call(env) unless Rails.application.config.froxy.use_esbuild
 
-        if (output = build(path)).is_a?(Rack::Response)
-          return output.finish
+        if (output = build(path))
+          return output.finish if output.is_a?(Rack::Response)
+
+          # output is a JSON object of the esbuild metafile.
+          # pp output
+          # pp output['outputs']["public/froxy/build/#{path}"]
+
+          req.path_info = "public/froxy/build/#{path}"
+          return @file_server.call(env)
         end
       end
 
@@ -34,7 +43,7 @@ module Froxy
 
     private
 
-    # Build the file from the given `path` using ESbuild. Returns the Rack::Response.
+    # Build the file from the given `path` using ESbuild. Returns a Rack::Response.
     def build(path)
       stdout, stderr, status = Open3.capture3([CLI, Rails.root, path].join(' '))
 
@@ -42,6 +51,8 @@ module Froxy
         Rails.logger.info "[froxy] built #{path}"
         raise "[froxy] build failed: #{stderr}" unless stderr.empty?
 
+        return true
+        return JSON.parse(stdout)
         response_from_build path, stdout
       else
         non_empty_streams = [stdout, stderr].delete_if(&:empty?)

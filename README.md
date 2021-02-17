@@ -3,12 +3,11 @@
 At its most basic, Froxy simply serves as a static delivery machanism for JS and CSS content in your
 Rails app. It allows you to serve files from anywhere in your /app directory.
 
-But Froxy also supports JS bundling with ESbuild, and when enabled, will bundle your JS and CSS on
-demand.
+## CSS
 
-## TODO
+CSS requested directly will render as a plain stylesheet - as you would expect.
 
-- ?
+But CSS that is imported from JS will
 
 ## Installation
 

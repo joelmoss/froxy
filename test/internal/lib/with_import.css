@@ -1,0 +1,6 @@
+@import "./reset.css";
+@import "/app/views/layouts/application.css";
+
+body {
+  color: red;
+}
