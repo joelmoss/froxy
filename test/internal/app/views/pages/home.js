@@ -3,7 +3,10 @@ import '/lib/some.css'
 // import "./_some.css";
 
 import imgUrl from '/lib/images/man.jpg'
-console.log(imgUrl)
+
+let image = new Image()
+image.src = imgUrl
+document.body.appendChild(image)
 
 console.log('app/views/pages/home.js')
 

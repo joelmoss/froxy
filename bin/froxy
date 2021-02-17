@@ -88,19 +88,13 @@ const buildOptions = {
   outdir: 'public/froxy/build',
   outbase: '.',
   metafile: `public/froxy/meta/${entryPointKey}.json`,
-  // loader: { '.png': 'file', '.jpg': 'file' },
   plugins: [loadStylePlugin, resolvePlugin]
 }
 
-esbuild
-  .build(buildOptions)
-  .then(results => {
-    // console.log(results);
-    // process.stdout.write(results.outputFiles[0].text);
+esbuild.build(buildOptions).catch(() => process.exit(1))
+// .then(results => {
+//   // console.log(results);
+//   // process.stdout.write(results.outputFiles[0].text);
 
-    process.stdout.write(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
-  })
-  .catch(error => {
-    // console.error(error);
-    process.exit(1)
-  })
+//   process.stdout.write(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
+// })

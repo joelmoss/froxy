@@ -5,9 +5,13 @@ Rails app. It allows you to serve files from anywhere in your /app directory.
 
 ## CSS
 
-CSS requested directly will render as a plain stylesheet - as you would expect.
+CSS requested directly will return a plain stylesheet - as you would expect. But CSS that is
+imported from JS will return inject the stylesheet into a `link` tag.
 
-But CSS that is imported from JS will
+## Images/Fonts, etc.
+
+When called directly, images are served directly - avoiding a call to esbuild. But when an image is
+imported from JS or used in a `url()` in CSS, the URL path is returned.
 
 ## Installation
 

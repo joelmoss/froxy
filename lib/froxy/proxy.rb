@@ -10,7 +10,6 @@ module Froxy
 
     def initialize(app)
       @app = app
-      @file_server = Rack::Files.new(Rails.root)
     end
 
     def call(env)
@@ -19,7 +18,7 @@ module Froxy
 
       # Let images through.
       if (req.get? || req.head?) && /\.(png|gif|jpe?g|svg|ico|webp|avif)$/i.match?(path_info)
-        return @file_server.call(env)
+        return Rack::Files.new(Rails.root).call(env)
       end
 
       # Let esbuild handle JS and CSS.
@@ -33,12 +32,7 @@ module Froxy
         if (output = build(path))
           return output.finish if output.is_a?(Rack::Response)
 
-          # output is a JSON object of the esbuild metafile.
-          # pp output
-          # pp output['outputs']["public/froxy/build/#{path}"]
-
-          req.path_info = "public/froxy/build/#{path}"
-          return @file_server.call(env)
+          return Rack::Files.new(Rails.public_path.join('froxy', 'build')).call(env)
         end
       end
 
@@ -55,9 +49,8 @@ module Froxy
         Rails.logger.info "[froxy] built #{path}"
         raise "[froxy] build failed: #{stderr}" unless stderr.empty?
 
-        return true
-        return JSON.parse(stdout)
-        response_from_build path, stdout
+        true
+        # response_from_build path, stdout
       else
         non_empty_streams = [stdout, stderr].delete_if(&:empty?)
         raise "[froxy] build failed:\n#{non_empty_streams.join("\n\n")}"
