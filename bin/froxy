@@ -88,14 +88,22 @@ const buildOptions = {
   format: 'esm',
   outdir: 'public/froxy/build',
   outbase: '.',
+  define: {
+    'process.env.NODE_ENV': `"${process.env.NODE_ENV || 'development'}"`,
+    'process.env.RAILS_ENV': `"${process.env.RAILS_ENV || 'development'}"`
+  },
   metafile: `public/froxy/meta/${entryPointKey}.json`,
   plugins: [envPlugin, loadStylePlugin, resolvePlugin]
 }
 
-esbuild.build(buildOptions).catch(() => process.exit(1))
-// .then(results => {
-//   // console.log(results);
-//   // process.stdout.write(results.outputFiles[0].text);
-
-//   process.stdout.write(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
-// })
+esbuild
+  .build(buildOptions)
+  .catch(error => {
+    console.error(error)
+    process.exit(1)
+  })
+  .then(results => {
+    console.log(results)
+    // process.stdout.write(results.outputFiles[0].text)
+    // process.stdout.write(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
+  })
