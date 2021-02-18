@@ -29,14 +29,12 @@ const resolvePlugin = {
       }
     })
 
-    // Mark as external if
-    // build.onResolve({ filter: IMAGE_TYPES }, args => {
-    //   console.log(args)
-    //   return {
-    //     path: resolve(args.resolveDir, args.path),
-    //     namespace: 'image'
-    //   }
-    // })
+    // Mark images as external. The proxy will render these directly. esbuild will just rewrite the
+    // path.
+    build.onResolve({ filter: IMAGE_TYPES }, args => ({
+      path: resolve(args.resolveDir, args.path).slice(absWorkingDir.length),
+      external: true
+    }))
 
     // Resolves paths starting with a `/` to the Rails root.
     //
@@ -67,17 +65,6 @@ const resolvePlugin = {
       `,
       loader: 'js'
     }))
-
-    // Handles images imported from JS or CSS.
-    //
-    // - Images imported from JS will return the URL of the image.
-    // - Images imported from CSS will be marked as external, allowing the browser to handle it.
-    build.onLoad({ filter: IMAGE_TYPES }, args => {
-      return {
-        contents: args.path.slice(absWorkingDir.length),
-        loader: 'text'
-      }
-    })
   }
 }
 

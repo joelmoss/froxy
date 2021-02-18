@@ -39,7 +39,7 @@ class ProxyTest < ActionDispatch::IntegrationTest
     get '/lib/with_url_image.css'
 
     assert_equal 'text/css', response.headers['Content-Type']
-    assert_equal 'body { background: url(/lib/avatar.png);'.squish, response.body.squish
+    assert_match 'body { background: url(/lib/avatar.png);'.squish, response.body.squish
   end
 
   test 'javascript' do
@@ -89,14 +89,10 @@ class ProxyTest < ActionDispatch::IntegrationTest
 
     assert_equal 'application/javascript', response.headers['Content-Type']
     assert_equal %(
-      // lib/avatar.png
-      var avatar_default = "/lib/avatar.png";
-
-      // lib/images/man.jpg
-      var man_default = "/lib/images/man.jpg";
-
       // lib/with_image_import.js
-      console.log(avatar_default, man_default);
+      import avatar1 from "/lib/avatar.png";
+      import avatar2 from "/lib/images/man.jpg";
+      console.log(avatar1, avatar2);
       console.log("/lib/with_image_import.js");
     ).squish, response.body.squish
   end
