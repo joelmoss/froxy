@@ -68,6 +68,16 @@ class ProxyTest < ActionDispatch::IntegrationTest
     ).squish, response.body.squish
   end
 
+  test 'javascript with node_modules CSS import' do
+    get '/lib/with_node_modules_css_import.js'
+
+    assert_equal 'application/javascript', response.headers['Content-Type']
+    assert_match %(
+      // cssFromJs:/Users/joelmoss/dev/froxy/test/internal/node_modules/react-day-picker/lib/style.css
+      loadStyle_default("/node_modules/react-day-picker/lib/style.css");
+    ).squish, response.body.squish
+  end
+
   test 'javascript with css import' do
     get '/lib/with_css_import.js'
 
@@ -96,6 +106,20 @@ class ProxyTest < ActionDispatch::IntegrationTest
       console.log("/lib/with_image_import.js");
     ).squish, response.body.squish
   end
+
+  # focus
+  # test 'javascript with dynamic import' do
+  #   get '/lib/with_dynamic_import.js'
+
+  #   assert_equal 'application/javascript', response.headers['Content-Type']
+  #   assert_equal %(
+  #     // lib/with_image_import.js
+  #     import avatar1 from "/lib/avatar.png";
+  #     import avatar2 from "/lib/images/man.jpg";
+  #     console.log(avatar1, avatar2);
+  #     console.log("/lib/with_image_import.js");
+  #   ).squish, response.body.squish
+  # end
 
   test 'image' do
     get '/lib/avatar.png'

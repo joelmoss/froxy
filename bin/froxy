@@ -11,6 +11,7 @@ const envPlugin = require('../lib/froxy/esbuild/plugins/env')
 
 const parsed = cli.parse()
 const [absWorkingDir, entryPoint] = parsed.args
+const nodeModulesDir = path.join(absWorkingDir, 'node_modules')
 const entryPointKey = crypto.createHash('sha1').update(entryPoint).digest('base64')
 
 const IMAGE_TYPES = /\.(png|gif|jpe?g|svg|ico|webp|avif)$/
@@ -18,9 +19,27 @@ const IMAGE_TYPES = /\.(png|gif|jpe?g|svg|ico|webp|avif)$/
 const resolvePlugin = {
   name: 'froxy.resolver',
   setup(build) {
-    const resolve = (b, p) => {
-      return p.startsWith('/') ? path.resolve(absWorkingDir, p.slice(1)) : path.resolve(b, p)
+    let nodeModulesExist = false
+    try {
+      fs.accessSync(nodeModulesDir, fs.constants.R_OK)
+      nodeModulesExist = true
+    } catch {
+      nodeModulesExist = false
     }
+
+    const resolve = (b, p) => {
+      if (p.startsWith('/')) return path.resolve(absWorkingDir, p.slice(1))
+      if (p.startsWith('.')) return path.resolve(b, p)
+
+      if (nodeModulesExist) return path.join(nodeModulesDir, p)
+    }
+
+    // build.onResolve({ filter: /.*/ }, args => {
+    //   console.log('onResolve', args)
+    // })
+    // build.onLoad({ filter: /.*/ }, args => {
+    //   console.log('onLoad', args)
+    // })
 
     build.onResolve({ filter: /\.css$/ }, args => {
       return {
@@ -75,6 +94,7 @@ const buildOptions = {
   format: 'esm',
   outdir: 'public/froxy/build',
   outbase: '.',
+  logLevel: 'error',
   define: {
     'process.env.NODE_ENV': `"${process.env.NODE_ENV || 'development'}"`,
     'process.env.RAILS_ENV': `"${process.env.RAILS_ENV || 'development'}"`
@@ -86,7 +106,7 @@ const buildOptions = {
 esbuild
   .build(buildOptions)
   .catch(error => {
-    console.error(error)
+    // console.error(error)
     process.exit(1)
   })
   .then(results => {

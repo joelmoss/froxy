@@ -47,6 +47,8 @@ module Froxy
     def build(path)
       stdout, stderr, status = Open3.capture3(CLI, Rails.root.to_s, path)
 
+      # pp stdout, stderr, status
+
       if status.success?
         Rails.logger.info "[froxy] built #{path}"
         raise "[froxy] build failed: #{stderr}" unless stderr.empty?

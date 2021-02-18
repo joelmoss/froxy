@@ -1,0 +1,9 @@
+{
+  "name": "internal",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "lodash-es": "^4.17.20",
+    "react-day-picker": "^7.4.8"
+  }
+}
