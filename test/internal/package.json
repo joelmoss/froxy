@@ -2,7 +2,14 @@
   "name": "internal",
   "version": "1.0.0",
   "private": true,
+  "froxy": {
+    "aliases": {
+      "_": "lodash-es",
+      "time": "/lib/time.js"
+    }
+  },
   "dependencies": {
+    "axios": "^0.21.1",
     "lodash-es": "^4.17.20",
     "react-day-picker": "^7.4.8"
   }

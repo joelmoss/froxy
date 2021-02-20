@@ -6,34 +6,20 @@ const cli = require('cac')()
 const esbuild = require('esbuild')
 const crypto = require('crypto')
 
-const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
-const envPlugin = require('../lib/froxy/esbuild/plugins/env')
-
 const parsed = cli.parse()
 const [absWorkingDir, entryPoint] = parsed.args
-const nodeModulesDir = path.join(absWorkingDir, 'node_modules')
 const entryPointKey = crypto.createHash('sha1').update(entryPoint).digest('base64')
+
+const { resolve } = require('../lib/froxy/esbuild/utils')
+const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
+const envPlugin = require('../lib/froxy/esbuild/plugins/env')
+const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')(absWorkingDir)
 
 const IMAGE_TYPES = /\.(png|gif|jpe?g|svg|ico|webp|avif)$/
 
 const resolvePlugin = {
   name: 'froxy.resolver',
   setup(build) {
-    let nodeModulesExist = false
-    try {
-      fs.accessSync(nodeModulesDir, fs.constants.R_OK)
-      nodeModulesExist = true
-    } catch {
-      nodeModulesExist = false
-    }
-
-    const resolve = (b, p) => {
-      if (p.startsWith('/')) return path.resolve(absWorkingDir, p.slice(1))
-      if (p.startsWith('.')) return path.resolve(b, p)
-
-      if (nodeModulesExist) return path.join(nodeModulesDir, p)
-    }
-
     // build.onResolve({ filter: /.*/ }, args => {
     //   console.log('onResolve', args)
     // })
@@ -41,9 +27,23 @@ const resolvePlugin = {
     //   console.log('onLoad', args)
     // })
 
+    // Handle CSS imported from JS.
     build.onResolve({ filter: /\.css$/ }, args => {
+      let resolvedPath = resolve(absWorkingDir, args.resolveDir, args.path)
+
+      if (resolvedPath === args.path) {
+        const nodeModulesDir = path.join(absWorkingDir, 'node_modules')
+
+        try {
+          fs.accessSync(nodeModulesDir, fs.constants.R_OK)
+          resolvedPath = path.join(nodeModulesDir, args.path)
+        } catch {
+          // Do nothing
+        }
+      }
+
       return {
-        path: resolve(args.resolveDir, args.path),
+        path: resolvedPath,
         namespace: args.importer.endsWith('.js') ? 'cssFromJs' : 'file'
       }
     })
@@ -51,7 +51,7 @@ const resolvePlugin = {
     // Mark images as external. The proxy will render these directly. esbuild will just rewrite the
     // path.
     build.onResolve({ filter: IMAGE_TYPES }, args => ({
-      path: resolve(args.resolveDir, args.path).slice(absWorkingDir.length),
+      path: resolve(absWorkingDir, args.resolveDir, args.path).slice(absWorkingDir.length),
       external: true
     }))
 
@@ -59,11 +59,9 @@ const resolvePlugin = {
     //
     // Example:
     //  import '/my/lib.js' //-> import '{Rails.root}/my/lib.js'
-    build.onResolve({ filter: /^\// }, args => {
-      return {
-        path: path.join(absWorkingDir, args.path)
-      }
-    })
+    build.onResolve({ filter: /^\// }, args => ({
+      path: path.join(absWorkingDir, args.path)
+    }))
 
     // Handles CSS imports from JS (eg `import from 'some.css'`) by simply marking it as external.
     // This then allows the browser to handle the import. However, browsers do not yet support
@@ -100,7 +98,7 @@ const buildOptions = {
     'process.env.RAILS_ENV': `"${process.env.RAILS_ENV || 'development'}"`
   },
   metafile: `public/froxy/meta/${entryPointKey}.json`,
-  plugins: [envPlugin, loadStylePlugin, resolvePlugin]
+  plugins: [aliasPlugin, envPlugin, loadStylePlugin, resolvePlugin]
 }
 
 esbuild

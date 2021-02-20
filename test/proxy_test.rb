@@ -107,6 +107,31 @@ class ProxyTest < ActionDispatch::IntegrationTest
     ).squish, response.body.squish
   end
 
+  test 'javascript with node module alias import' do
+    get '/lib/with_node_module_alias_import.js'
+
+    assert_equal 'application/javascript', response.headers['Content-Type']
+    assert_match %(
+      // lib/with_node_module_alias_import.js
+      console.log(isArray_default([]));
+      console.log("/lib/with_node_module_alias_import.js");
+    ).squish, response.body.squish
+  end
+
+  test 'javascript with local alias import' do
+    get '/lib/with_local_alias_import.js'
+
+    assert_equal 'application/javascript', response.headers['Content-Type']
+    assert_match %(
+      // lib/time.js
+      var time_default = "2pm";
+
+      // lib/with_local_alias_import.js
+      console.log(`time = ${time_default}`);
+      console.log("/lib/with_local_alias_import.js");
+    ).squish, response.body.squish
+  end
+
   # focus
   # test 'javascript with dynamic import' do
   #   get '/lib/with_dynamic_import.js'
