@@ -99,10 +99,14 @@ class ProxyTest < ActionDispatch::IntegrationTest
 
     assert_equal 'application/javascript', response.headers['Content-Type']
     assert_equal %(
+      // lib/avatar.png
+      var avatar_default = "/lib/avatar.png";
+
+      // lib/images/man.jpg
+      var man_default = "/lib/images/man.jpg";
+
       // lib/with_image_import.js
-      import avatar1 from "/lib/avatar.png";
-      import avatar2 from "/lib/images/man.jpg";
-      console.log(avatar1, avatar2);
+      console.log(avatar_default, man_default);
       console.log("/lib/with_image_import.js");
     ).squish, response.body.squish
   end
