@@ -14,74 +14,19 @@ const { resolve } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
 const envPlugin = require('../lib/froxy/esbuild/plugins/env')
 const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')(absWorkingDir)
+const cssPlugin = require('../lib/froxy/esbuild/plugins/css')(absWorkingDir)
+const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')(absWorkingDir)
+const rootPlugin = require('../lib/froxy/esbuild/plugins/root')(absWorkingDir)
 
-const IMAGE_TYPES = /\.(png|gif|jpe?g|svg|ico|webp|avif)$/
-
-const resolvePlugin = {
-  name: 'froxy.resolver',
+const testPlugin = {
+  name: 'froxy.test',
   setup(build) {
-    // build.onResolve({ filter: /.*/ }, args => {
-    //   console.log('onResolve', args)
-    // })
-    // build.onLoad({ filter: /.*/ }, args => {
-    //   console.log('onLoad', args)
-    // })
-
-    // Handle CSS imported from JS.
-    build.onResolve({ filter: /\.css$/ }, args => {
-      let resolvedPath = resolve(absWorkingDir, args.resolveDir, args.path)
-
-      if (resolvedPath === args.path) {
-        const nodeModulesDir = path.join(absWorkingDir, 'node_modules')
-
-        try {
-          fs.accessSync(nodeModulesDir, fs.constants.R_OK)
-          resolvedPath = path.join(nodeModulesDir, args.path)
-        } catch {
-          // Do nothing
-        }
-      }
-
-      return {
-        path: resolvedPath,
-        namespace: args.importer.endsWith('.js') ? 'cssFromJs' : 'file'
-      }
+    build.onResolve({ filter: /.*/ }, args => {
+      console.log('onResolve', args)
     })
-
-    // Mark images as external. The proxy will render these directly. esbuild will just rewrite the
-    // path.
-    build.onResolve({ filter: IMAGE_TYPES }, args => ({
-      path: resolve(absWorkingDir, args.resolveDir, args.path).slice(absWorkingDir.length),
-      external: true
-    }))
-
-    // Resolves paths starting with a `/` to the Rails root.
-    //
-    // Example:
-    //  import '/my/lib.js' //-> import '{Rails.root}/my/lib.js'
-    build.onResolve({ filter: /^\// }, args => ({
-      path: path.join(absWorkingDir, args.path)
-    }))
-
-    // Handles CSS imports from JS (eg `import from 'some.css'`) by simply marking it as external.
-    // This then allows the browser to handle the import. However, browsers do not yet support
-    // importing non-JS assets, and will not include the CSS. So the Froxy proxy will return the
-    // imported CSS as a JS file that inserts the CSS directly into the DOM. This unfortunately may
-    // result in a flash of unstyled content (FOUC).
-    //
-    // --- OR
-    //
-    // esbuild returns the content of both the JS and CSS. Then Froxy returns the JS as normal,
-    // and additionally includes the CSS directly into the rendered HTML. This way, there will be no
-    // FOUC. But this method is a little more complex, as Froxy will need to somehow pass the CSS
-    // content to Rails for insertion into the rendered view.
-    build.onLoad({ filter: /\.css$/, namespace: 'cssFromJs' }, args => ({
-      contents: `
-        import loadStyle from 'loadStyle'
-        loadStyle("${args.path.slice(absWorkingDir.length)}")
-      `,
-      loader: 'js'
-    }))
+    build.onLoad({ filter: /.*/ }, args => {
+      console.log('onLoad', args)
+    })
   }
 }
 
@@ -98,7 +43,7 @@ const buildOptions = {
     'process.env.RAILS_ENV': `"${process.env.RAILS_ENV || 'development'}"`
   },
   metafile: `public/froxy/meta/${entryPointKey}.json`,
-  plugins: [aliasPlugin, envPlugin, loadStylePlugin, resolvePlugin]
+  plugins: [aliasPlugin, envPlugin, loadStylePlugin, cssPlugin, imagesPlugin, rootPlugin]
 }
 
 esbuild
