@@ -4,6 +4,7 @@
   "private": true,
   "froxy": {
     "minify": false,
+    "sourcemap": false,
     "target": "es2016",
     "aliases": {
       "_": "lodash-es",

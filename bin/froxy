@@ -38,6 +38,7 @@ const buildOptions = {
   bundle: true,
   target: conf.target,
   minify: conf.minify,
+  sourcemap: conf.sourcemap,
   format: 'esm',
   outdir: 'public/froxy/build',
   outbase: '.',
@@ -58,6 +59,7 @@ esbuild
   })
   .then(results => {
     // console.log(results)
+    // console.log(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
     process.stdout.write(buildOptions.metafile)
     // process.stdout.write(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
   })

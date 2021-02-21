@@ -19,28 +19,33 @@ module Froxy
       req = Rack::Request.new(env)
       path_info = req.path_info
 
-      # Let images through.
-      if (req.get? || req.head?) && IMAGE_TYPES.match?(path_info)
-        return Rack::Files.new(Rails.root).call(env)
-      end
+      if req.get? || req.head?
+        # Let images through.
+        return Rack::Files.new(Rails.root).call(env) if IMAGE_TYPES.match?(path_info)
 
-      # Let esbuild handle JS and CSS.
-      if (req.get? || req.head?) && /\.(js|jsx|css)$/i.match?(path_info)
-        return unless (path = clean_path(path_info))
-
-        return [404, {}, []] unless file_readable?(path)
-
-        unless Rails.application.config.froxy.use_esbuild
-          return Rack::Files.new(Rails.root).call(env)
+        # Let JS sourcemaps through.
+        if /\.js\.map$/i.match?(path_info)
+          return Rack::Files.new(Rails.root.join(BUILD_PATH)).call(env)
         end
 
-        if (output = build(path))
-          # Output is the file contents.
-          return output.finish if output.is_a?(Rack::Response)
+        # Let esbuild handle JS and CSS.
+        if /\.(js|jsx|css)$/i.match?(path_info)
+          return unless (path = clean_path(path_info))
 
-          # Output is the path to the esbuild metafile. Parse it and return the first output file,
-          # which should be the requested file.
-          return output_file_from_metadata(env, req, output)
+          return [404, {}, []] unless file_readable?(path)
+
+          unless Rails.application.config.froxy.use_esbuild
+            return Rack::Files.new(Rails.root).call(env)
+          end
+
+          if (output = build(path))
+            # Output is the file contents.
+            return output.finish if output.is_a?(Rack::Response)
+
+            # Output is the path to the esbuild metafile. Parse it and return the first output file,
+            # which should be the requested file.
+            return output_file_from_metadata(env, req, output)
+          end
         end
       end
 
@@ -52,7 +57,7 @@ module Froxy
     def output_file_from_metadata(env, request, path)
       metadata = FastJsonparser.load(Rails.root.join(path).to_s)
 
-      request.path_info = metadata[:outputs].keys.first.to_s.delete_prefix(BUILD_PATH.to_s)
+      request.path_info = metadata[:outputs].keys.last.to_s.delete_prefix(BUILD_PATH.to_s)
       Rack::Files.new(Rails.root.join(BUILD_PATH)).call(env)
     end
 

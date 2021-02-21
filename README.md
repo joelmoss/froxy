@@ -169,6 +169,12 @@ See [aliases](#import-aliases)
 
 See esbuild's documentation on [minification](https://esbuild.github.io/api/#minify).
 
+### `sourcemap`
+
+(default: `true`)
+
+See esbuild's documentation on [sourcemap](https://esbuild.github.io/api/#sourcemap).
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
