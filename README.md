@@ -16,7 +16,7 @@ production mode will likely include pre-built cachable assets.
 
 ## Features
 
-- Real-time bundling of Javascript and CSS.
+- Real-time bundling of JS, JSX and CSS.
 - Import CSS and other static assets (images, fonts, etc.)
 - Serve assets from anywhere within the Rails root. (eg. `/app/views/layouts/application.css`, or `/lib/utils/time.js`)
 - Side loaded JS/CSS for your layouts and views.
@@ -30,7 +30,6 @@ In no particular order:
 - Source Maps.
 - Minification.
 - Pre-bundling / cached assets.
-- JSX.
 - Typescript.
 - CSS Modules.
 - PostCSS support.

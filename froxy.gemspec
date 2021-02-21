@@ -29,4 +29,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_runtime_dependency 'activesupport', ['>= 5.0.0', '< 7.0']
+  spec.add_runtime_dependency 'fast_jsonparser', '>= 0.5.0'
 end
