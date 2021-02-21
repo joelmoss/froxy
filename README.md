@@ -143,7 +143,8 @@ Or install it yourself as:
 
 ## Configuration
 
-There are a few options that you can customise, and they are all defined in your `package.json`.
+There are a few options that you can customise, and they are all defined in your `package.json`. For
+example:
 
 ```json
 "froxy": {
@@ -161,6 +162,12 @@ See esbuild's documentation on [defining targets](https://esbuild.github.io/api/
 ### `aliases`
 
 See [aliases](#import-aliases)
+
+### `minify`
+
+(default: `true`)
+
+See esbuild's documentation on [minification](https://esbuild.github.io/api/#minify).
 
 ## Development
 

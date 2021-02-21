@@ -34,9 +34,10 @@ const conf = config(absWorkingDir)
 
 const buildOptions = {
   absWorkingDir,
-  target: conf.target,
   entryPoints: [entryPoint],
   bundle: true,
+  target: conf.target,
+  minify: conf.minify,
   format: 'esm',
   outdir: 'public/froxy/build',
   outbase: '.',

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "froxy": {
+    "minify": false,
     "target": "es2016",
     "aliases": {
       "_": "lodash-es",
