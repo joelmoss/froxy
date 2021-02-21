@@ -10,7 +10,7 @@ const parsed = cli.parse()
 const [absWorkingDir, entryPoint] = parsed.args
 const entryPointKey = crypto.createHash('sha1').update(entryPoint).digest('base64')
 
-const { resolve } = require('../lib/froxy/esbuild/utils')
+const { resolve, config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
 const envPlugin = require('../lib/froxy/esbuild/plugins/env')
 const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')(absWorkingDir)
@@ -30,8 +30,11 @@ const testPlugin = {
   }
 }
 
+const conf = config(absWorkingDir)
+
 const buildOptions = {
   absWorkingDir,
+  target: conf.target,
   entryPoints: [entryPoint],
   bundle: true,
   format: 'esm',

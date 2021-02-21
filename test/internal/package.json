@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "froxy": {
+    "target": "es2016",
     "aliases": {
       "_": "lodash-es",
       "time": "/lib/time.js"

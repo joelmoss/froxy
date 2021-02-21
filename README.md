@@ -141,6 +141,27 @@ Or install it yourself as:
 
     $ gem install froxy
 
+## Configuration
+
+There are a few options that you can customise, and they are all defined in your `package.json`.
+
+```json
+"froxy": {
+  "target": [],
+  "aliases": {
+    "_": "lodash"
+  }
+}
+```
+
+### `target`
+
+See esbuild's documentation on [defining targets](https://esbuild.github.io/api/#target).
+
+### `aliases`
+
+See [aliases](#import-aliases)
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
