@@ -52,6 +52,10 @@ Or install it yourself as:
 
     $ gem install froxy
 
+Now assuming you have a `package.json` in your Rails root, install [esbuild](https://esbuild.github.io):
+
+    $ yarn add esbuild
+
 ## Usage
 
 ### Javascript

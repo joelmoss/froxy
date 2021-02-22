@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const esbuild = require('esbuild')
+const esbuild = require(require.resolve('esbuild', { paths: [process.cwd()] }))
 
 const [, , absWorkingDir, entryPoint] = process.argv
 
