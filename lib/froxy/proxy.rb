@@ -10,9 +10,14 @@ module Froxy
     BUILD_PATH = 'public/froxy/build'
     CLI = File.expand_path('../../bin/froxy', __dir__)
     IMAGE_TYPES = /\.(png|gif|jpeg|jpg|svg|ico|webp|avif)$/i.freeze
+    FILE_EXT_MAP = {
+      '.jsx' => '.js'
+    }.freeze
 
     def initialize(app)
       @app = app
+      @file_server = Rack::Files.new(Rails.root)
+      @build_file_server = Rack::Files.new(Rails.root.join(BUILD_PATH))
     end
 
     def call(env)
@@ -21,31 +26,18 @@ module Froxy
 
       if req.get? || req.head?
         # Let images through.
-        return Rack::Files.new(Rails.root).call(env) if IMAGE_TYPES.match?(path_info)
+        return @file_server.call(env) if IMAGE_TYPES.match?(path_info)
 
         # Let JS sourcemaps through.
-        if /\.js\.map$/i.match?(path_info)
-          return Rack::Files.new(Rails.root.join(BUILD_PATH)).call(env)
-        end
+        return @build_file_server.call(env) if /\.js\.map$/i.match?(path_info)
 
         # Let esbuild handle JS and CSS.
         if /\.(js|jsx|css)$/i.match?(path_info)
           return unless (path = clean_path(path_info))
-
           return [404, {}, []] unless file_readable?(path)
+          return @file_server.call(env) unless Rails.application.config.froxy.use_esbuild
 
-          unless Rails.application.config.froxy.use_esbuild
-            return Rack::Files.new(Rails.root).call(env)
-          end
-
-          if (output = build(path))
-            # Output is the file contents.
-            return output.finish if output.is_a?(Rack::Response)
-
-            # Output is the path to the esbuild metafile. Parse it and return the first output file,
-            # which should be the requested file.
-            return output_file_from_metadata(env, req, output)
-          end
+          return build env, req, path
         end
       end
 
@@ -54,15 +46,15 @@ module Froxy
 
     private
 
-    def output_file_from_metadata(env, request, path)
-      metadata = FastJsonparser.load(Rails.root.join(path).to_s)
+    def path_to_file(env, request, path)
+      ext = Pathname.new(path).extname
+      request.path_info = path.sub(/#{ext}$/, FILE_EXT_MAP[ext]) if FILE_EXT_MAP.key?(ext)
 
-      request.path_info = metadata[:outputs].keys.last.to_s.delete_prefix(BUILD_PATH.to_s)
-      Rack::Files.new(Rails.root.join(BUILD_PATH)).call(env)
+      @build_file_server.call env
     end
 
     # Build the file from the given `path` using ESbuild. Returns a Rack::Response.
-    def build(path)
+    def build(env, request, path)
       stdout, stderr, status = Open3.capture3(CLI, Rails.root.to_s, path)
 
       if status.success?
@@ -73,18 +65,7 @@ module Froxy
         raise "[froxy] build failed:\n#{non_empty_streams.join("\n\n")}"
       end
 
-      stdout
-    end
-
-    # Only needed if we return file contents from CLI.
-    def response_from_build(path, body)
-      response = Rack::Response.new(body)
-      response.content_type = content_type_for(path)
-      response
-    end
-
-    def content_type_for(path)
-      Rack::Mime.mime_type(::File.extname(path), nil) || 'text/plain'
+      path_to_file env, request, path
     end
 
     def file_readable?(path)

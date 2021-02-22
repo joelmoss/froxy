@@ -154,7 +154,7 @@ class ProxyTest < ActionDispatch::IntegrationTest
   end
 
   # focus
-  # test 'javascript with dynamic import' do
+  # test 'javascript with dynamic split import' do
   #   get '/lib/with_dynamic_import.js'
 
   #   assert_equal 'application/javascript', response.headers['Content-Type']
