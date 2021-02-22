@@ -38,6 +38,7 @@ const buildOptions = {
   bundle: true,
   target: conf.target,
   minify: conf.minify,
+  inject: conf.inject,
   sourcemap: conf.sourcemap,
   format: 'esm',
   splitting: true,

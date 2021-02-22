@@ -159,6 +159,10 @@ example:
 
 See esbuild's documentation on [defining targets](https://esbuild.github.io/api/#target).
 
+### `inject`
+
+See esbuild's documentation on [inject](https://esbuild.github.io/api/#inject).
+
 ### `aliases`
 
 See [aliases](#import-aliases)
