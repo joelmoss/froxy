@@ -2,7 +2,6 @@
 
 require 'open3'
 require 'rack/utils'
-require 'fast_jsonparser'
 
 # Proxies files to esbuild.
 module Froxy
