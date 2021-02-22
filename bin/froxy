@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 
-const path = require('path')
-const fs = require('fs')
 const esbuild = require('esbuild')
-const crypto = require('crypto')
 
 const [, , absWorkingDir, entryPoint] = process.argv
-const entryPointKey = crypto.createHash('sha1').update(entryPoint).digest('base64')
 
 const { resolve, config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
@@ -15,18 +11,6 @@ const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')(absWorkingDir)
 const cssPlugin = require('../lib/froxy/esbuild/plugins/css')(absWorkingDir)
 const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')(absWorkingDir)
 const rootPlugin = require('../lib/froxy/esbuild/plugins/root')(absWorkingDir)
-
-const testPlugin = {
-  name: 'froxy.test',
-  setup(build) {
-    build.onResolve({ filter: /.*/ }, args => {
-      console.log('onResolve', args)
-    })
-    build.onLoad({ filter: /.*/ }, args => {
-      console.log('onLoad', args)
-    })
-  }
-}
 
 const conf = config(absWorkingDir)
 
@@ -48,20 +32,9 @@ const buildOptions = {
     'process.env.NODE_ENV': `"${process.env.NODE_ENV || 'development'}"`,
     'process.env.RAILS_ENV': `"${process.env.RAILS_ENV || 'development'}"`
   },
-  // metafile: `public/froxy/meta/${entryPointKey}.json`,
   plugins: [aliasPlugin, envPlugin, loadStylePlugin, cssPlugin, imagesPlugin, rootPlugin]
 }
 
 esbuild.build(buildOptions).catch(() => {
   process.exit(1)
 })
-// .then(results => {
-//   // console.log(results)
-//   const meta = JSON.parse(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
-//   console.log(meta)
-//   // console.log(Object.keys(meta.inputs))
-//   // console.log(Object.keys(meta.outputs))
-
-//   process.stdout.write(buildOptions.metafile)
-//   // process.stdout.write(fs.readFileSync(`${absWorkingDir}/${buildOptions.metafile}`, 'utf8'))
-// })
