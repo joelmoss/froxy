@@ -1,6 +1,6 @@
 # Froxy - Fast ESModule based Frontend Bundling for Rails
 
-Froxy serves as a delivery machanism for all your frontend assets in Rails applications. It is
+Froxy serves as a delivery machanism for all your frontend assets in Rails. It is
 designed specifically for Rails applications, and can completely replace Webpacker and the Rails
 asset pipeline (Sprockets) by bundling your ESModule based frontend code in real time and on demand.
 It does this by proxying all frontend requests to the amazing [esbuild](https://esbuild.github.io).
@@ -21,20 +21,40 @@ production mode will likely include pre-built cachable assets.
 - Serve assets from anywhere within the Rails root. (eg. `/app/views/layouts/application.css`, or `/lib/utils/time.js`)
 - Side loaded JS/CSS for your layouts and views.
 - [Tree shaking](https://esbuild.github.io/api/#tree-shaking).
+- Code Splitting.
+- Source Maps.
+- Minification.
 
 ## Roadmap
 
 In no particular order:
 
-- Code Splitting.
-- Source Maps.
-- Minification.
 - Pre-bundling / cached assets.
 - Typescript.
 - CSS Modules.
 - PostCSS support.
 
-## Javascript
+## Installation
+
+Froxy requires Rails 6+ and Node.
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'froxy'
+```
+
+And then execute:
+
+    $ bundle install
+
+Or install it yourself as:
+
+    $ gem install froxy
+
+## Usage
+
+### Javascript
 
 Import any JS:
 
@@ -49,7 +69,7 @@ imported dependencies into the file itself.
 
 The JS file extension is not required and is assumed.
 
-## CSS
+### CSS
 
 CSS requested directly will return a plain stylesheet - as you would expect. But CSS that is
 imported from JS will result in the requested CSS injected into an HTML `link` tag.
@@ -58,7 +78,7 @@ imported from JS will result in the requested CSS injected into an HTML `link` t
 import '/my/styles.css'
 ```
 
-## Images/Fonts, etc.
+### Images/Fonts, etc.
 
 When called directly, images are served directly - avoiding a call to esbuild. But when an image is
 imported from JS or used in a `url()` in CSS, the URL path is returned.
@@ -76,7 +96,7 @@ body {
 }
 ```
 
-## Side Loaded JS/CSS
+### Side Loaded JS/CSS
 
 Froxy also has built in support for automatically side loading JS and CSS with your views and
 layouts.
@@ -101,7 +121,7 @@ like this:
 On each page request, Froxy will check if your layout and view has a JS/CSS file of the same name,
 and include them into your layout HTML.
 
-## Import aliases
+### Import aliases
 
 Module aliases can be defined in your package.json, supporting local and node modules.
 
@@ -123,25 +143,7 @@ import { map } from '_'
 import axios from 'myaxios'
 ```
 
-## Installation
-
-Froxy requires Rails 6+ and Node.
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'froxy'
-```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install froxy
-
-## Configuration
+### Configuration
 
 There are a few options that you can customise, and they are all defined in your `package.json`. For
 example:
@@ -155,25 +157,25 @@ example:
 }
 ```
 
-### `target`
+#### `target`
 
 See esbuild's documentation on [defining targets](https://esbuild.github.io/api/#target).
 
-### `inject`
+#### `inject`
 
 See esbuild's documentation on [inject](https://esbuild.github.io/api/#inject).
 
-### `aliases`
+#### `aliases`
 
 See [aliases](#import-aliases)
 
-### `minify`
+#### `minify`
 
 (default: `false`)
 
 See esbuild's documentation on [minification](https://esbuild.github.io/api/#minify).
 
-### `sourcemap`
+#### `sourcemap`
 
 (default: `true`)
 
