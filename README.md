@@ -165,7 +165,7 @@ See [aliases](#import-aliases)
 
 ### `minify`
 
-(default: `true`)
+(default: `false`)
 
 See esbuild's documentation on [minification](https://esbuild.github.io/api/#minify).
 
