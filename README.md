@@ -88,6 +88,10 @@ import '/my/styles.css'
 [PostCSS config](https://github.com/postcss/postcss-load-config) is found in your project, then any
 local CSS (not from node modules) will be parsed with PostCSS.
 
+You will need to install the [postcss](https://www.npmjs.com/package/postcss) and [postcss-load-config](https://www.npmjs.com/package/postcss-load-config) packages:
+
+    $ yarn add postcss postcss-load-config
+
 ### Images/Fonts, etc.
 
 When called directly, images are served directly - avoiding a call to esbuild. But when an image is
