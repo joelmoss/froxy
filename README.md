@@ -159,10 +159,12 @@ There are a few options that you can customise, and they are all defined in your
 example:
 
 ```json
-"froxy": {
-  "target": [],
-  "aliases": {
-    "_": "lodash"
+{
+  "froxy": {
+    "target": [],
+    "aliases": {
+      "_": "lodash"
+    }
   }
 }
 ```
@@ -190,6 +192,22 @@ See esbuild's documentation on [minification](https://esbuild.github.io/api/#min
 (default: `true`)
 
 See esbuild's documentation on [sourcemap](https://esbuild.github.io/api/#sourcemap).
+
+#### `ignore`
+
+A regular expression matching paths that should be ignored and not built or bundled.
+
+Example:
+
+Ignore all paths starting with "/fonts/":
+
+```json
+{
+  "froxy": {
+    "ignore": "^\\/fonts\\/"
+  }
+}
+```
 
 ## Development
 

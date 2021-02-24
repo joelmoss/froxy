@@ -11,7 +11,7 @@ module Froxy
 
     BUILD_PATH = 'public/froxy/build'
     CLI = File.expand_path('../../bin/froxy', __dir__)
-    IMAGE_TYPES = /\.(png|gif|jpeg|jpg|svg|ico|webp|avif)$/i.freeze
+    FALLTHRU_TYPES = /\.(png|gif|jpeg|jpg|svg|ico|webp|avif)$/i.freeze
     FILE_EXT_MAP = {
       '.jsx' => '.js'
     }.freeze
@@ -28,7 +28,7 @@ module Froxy
 
       if req.get? || req.head?
         # Let images through.
-        return @file_server.call(env) if IMAGE_TYPES.match?(path_info)
+        return @file_server.call(env) if FALLTHRU_TYPES.match?(path_info)
 
         # Let JS sourcemaps through.
         return @build_file_server.call(env) if /\.js\.map$/i.match?(path_info)

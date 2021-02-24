@@ -6,7 +6,7 @@ const esbuild = require(require.resolve('esbuild', { paths: [cwd] }))
 
 const { resolve, config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
-const envPlugin = require('../lib/froxy/esbuild/plugins/env')
+const ignorePlugin = require('../lib/froxy/esbuild/plugins/ignore')
 const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')
 const cssPlugin = require('../lib/froxy/esbuild/plugins/css')
 const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')
@@ -30,8 +30,10 @@ const buildOptions = {
     'process.env.NODE_ENV': `"${process.env.NODE_ENV || 'development'}"`,
     'process.env.RAILS_ENV': `"${process.env.RAILS_ENV || 'development'}"`
   },
-  plugins: [aliasPlugin, envPlugin, loadStylePlugin, cssPlugin, imagesPlugin, rootPlugin]
+  plugins: [aliasPlugin, loadStylePlugin, cssPlugin, imagesPlugin, rootPlugin]
 }
+
+config.ignore && buildOptions.plugins.unshift(ignorePlugin)
 
 esbuild.build(buildOptions).catch(() => {
   process.exit(1)
