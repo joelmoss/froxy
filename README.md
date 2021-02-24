@@ -24,6 +24,7 @@ production mode will likely include pre-built cachable assets.
 - Code Splitting.
 - Source Maps.
 - Minification.
+- PostCSS support.
 
 ## Roadmap
 
@@ -32,7 +33,6 @@ In no particular order:
 - Pre-bundling / cached assets.
 - Typescript.
 - CSS Modules.
-- PostCSS support.
 
 ## Installation
 
@@ -81,6 +81,12 @@ imported from JS will result in the requested CSS injected into an HTML `link` t
 ```javascript
 import '/my/styles.css'
 ```
+
+### PostCSS
+
+[PostCSS](https://postcss.org/) is supported out of the box. If any
+[PostCSS config](https://github.com/postcss/postcss-load-config) is found in your project, then any
+local CSS (not from node modules) will be parsed with PostCSS.
 
 ### Images/Fonts, etc.
 

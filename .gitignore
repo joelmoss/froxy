@@ -6,5 +6,6 @@
 /pkg/
 /spec/reports/
 /tmp/
-/test/internal/public
+/test/internal/public/
+/test/internal/tmp/
 /node_modules/

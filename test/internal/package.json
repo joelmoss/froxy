@@ -13,7 +13,11 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "esbuild": "^0.8.51",
     "lodash-es": "^4.17.20",
+    "postcss": "^8.2.6",
+    "postcss-load-config": "^3.0.1",
+    "postcss-nested": "^5.0.3",
     "react-day-picker": "^7.4.8"
   }
 }

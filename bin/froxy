@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const esbuild = require(require.resolve('esbuild', { paths: [process.cwd()] }))
-
 const [, , absWorkingDir, entryPoint] = process.argv
+
+const esbuild = require(require.resolve('esbuild', { paths: [absWorkingDir] }))
 
 const { resolve, config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')

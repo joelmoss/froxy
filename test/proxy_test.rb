@@ -15,6 +15,15 @@ class ProxyTest < ActionDispatch::IntegrationTest
     ).squish, response.body.squish
   end
 
+  test 'stylesheet with postcss' do
+    get '/lib/with_postcss.css'
+
+    assert_equal 'text/css', response.headers['Content-Type']
+    assert_equal %(
+      /* lib/with_postcss.css */ html body { color: blue; }
+    ).squish, response.body.squish
+  end
+
   test 'stylesheet with @import' do
     get '/lib/with_import.css'
 
@@ -89,26 +98,17 @@ class ProxyTest < ActionDispatch::IntegrationTest
     get '/lib/with_node_modules_css_import.js'
 
     assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match %(
-      // cssFromJs:/Users/joelmoss/dev/froxy/test/internal/node_modules/react-day-picker/lib/style.css
-      loadStyle_default("/node_modules/react-day-picker/lib/style.css");
-    ).squish, response.body.squish
+    assert_match %(loadStyle_default("/node_modules/react-day-picker/lib/style.css");),
+                 response.body
   end
 
   test 'javascript with css import' do
     get '/lib/with_css_import.js'
 
     assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match %(
-      // cssFromJs:/Users/joelmoss/dev/froxy/test/internal/lib/reset.css
-      loadStyle_default("/lib/reset.css");
-
-      // cssFromJs:/Users/joelmoss/dev/froxy/test/internal/lib/some.css
-      loadStyle_default("/lib/some.css");
-
-      // lib/with_css_import.js
-      console.log("/lib/with_css_import.js");
-    ).squish, response.body.squish
+    assert_match %(loadStyle_default("/lib/reset.css");), response.body
+    assert_match %(loadStyle_default("/lib/reset.css");), response.body
+    assert_match %(console.log("/lib/with_css_import.js");), response.body
   end
 
   test 'javascript with image import' do
