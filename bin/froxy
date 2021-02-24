@@ -1,27 +1,25 @@
 #!/usr/bin/env node
 
-const [, , absWorkingDir, entryPoint] = process.argv
+const [, , cwd, entryPoint] = process.argv
 
-const esbuild = require(require.resolve('esbuild', { paths: [absWorkingDir] }))
+const esbuild = require(require.resolve('esbuild', { paths: [cwd] }))
 
 const { resolve, config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
 const envPlugin = require('../lib/froxy/esbuild/plugins/env')
-const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')(absWorkingDir)
-const cssPlugin = require('../lib/froxy/esbuild/plugins/css')(absWorkingDir)
-const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')(absWorkingDir)
-const rootPlugin = require('../lib/froxy/esbuild/plugins/root')(absWorkingDir)
-
-const conf = config(absWorkingDir)
+const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')
+const cssPlugin = require('../lib/froxy/esbuild/plugins/css')
+const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')
+const rootPlugin = require('../lib/froxy/esbuild/plugins/root')
 
 const buildOptions = {
-  absWorkingDir,
+  absWorkingDir: cwd,
   entryPoints: [entryPoint],
   bundle: true,
-  target: conf.target,
-  minify: conf.minify,
-  inject: conf.inject,
-  sourcemap: conf.sourcemap,
+  target: config.target,
+  minify: config.minify,
+  inject: config.inject,
+  sourcemap: config.sourcemap,
   format: 'esm',
   splitting: true,
   outdir: 'public/froxy/build',
