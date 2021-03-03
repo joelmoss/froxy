@@ -7,6 +7,7 @@ module Froxy
   extend ActiveSupport::Autoload
 
   autoload :Proxy
+  autoload :Builder
 end
 
 require 'froxy/railtie'

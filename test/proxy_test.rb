@@ -8,7 +8,6 @@ class ProxyTest < ActionDispatch::IntegrationTest
 
     assert_equal 'text/css', response.headers['Content-Type']
     assert_equal %(
-      /* app/views/layouts/application.css */
       body {
         color: red;
       }
@@ -20,7 +19,7 @@ class ProxyTest < ActionDispatch::IntegrationTest
 
     assert_equal 'text/css', response.headers['Content-Type']
     assert_equal %(
-      /* lib/with_postcss.css */ html body { color: blue; }
+      html body { color: blue; }
     ).squish, response.body.squish
   end
 
@@ -174,12 +173,14 @@ class ProxyTest < ActionDispatch::IntegrationTest
   end
 
   test 'stylesheet not found' do
-    get '/notfound.css'
-    assert_response :missing
+    assert_raises ActionController::RoutingError do
+      get '/notfound.css'
+    end
   end
 
   test 'javascript not found' do
-    get '/notfound.js'
-    assert_response :missing
+    assert_raises ActionController::RoutingError do
+      get '/notfound.js'
+    end
   end
 end

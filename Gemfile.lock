@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    froxy (0.1.2)
+    froxy (0.2.0)
       activesupport (>= 5.0.0, < 7.0)
 
 GEM
