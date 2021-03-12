@@ -1,3 +1,7 @@
 .some {
-  color: red;
+  color: blue;
+}
+
+h1::after {
+  content: '`';
 }

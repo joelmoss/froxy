@@ -1,0 +1,13 @@
+
+          const s = document.createElement('style');
+          s.appendChild(document.createTextNode(`._some_4iuk9_1 {
+  color: blue;
+}
+
+h1::after {
+  content: '\`';
+}
+`));
+          document.head.appendChild(s);
+          export default {"some":"_some_4iuk9_1"};
+        

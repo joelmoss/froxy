@@ -23,32 +23,32 @@ class ProxyTest < ActionDispatch::IntegrationTest
     ).squish, response.body.squish
   end
 
-  test 'stylesheet with @import' do
-    get '/lib/with_import.css'
+  # test 'stylesheet with @import' do
+  #   get '/lib/with_import.css'
 
-    assert_equal 'text/css', response.headers['Content-Type']
-    assert_equal %(
-      /* lib/reset.css */
-      body {
-        font-size: 16px;
-      }
-      /* app/views/layouts/application.css */
-      body {
-        color: red;
-      }
-      /* lib/with_import.css */
-      body {
-        color: red;
-      }
-    ).squish, response.body.squish
-  end
+  #   assert_equal 'text/css', response.headers['Content-Type']
+  #   assert_equal %(
+  #     /* lib/reset.css */
+  #     body {
+  #       font-size: 16px;
+  #     }
+  #     /* app/views/layouts/application.css */
+  #     body {
+  #       color: red;
+  #     }
+  #     /* lib/with_import.css */
+  #     body {
+  #       color: red;
+  #     }
+  #   ).squish, response.body.squish
+  # end
 
-  test 'stylesheet with url() image' do
-    get '/lib/with_url_image.css'
+  # test 'stylesheet with url() image' do
+  #   get '/lib/with_url_image.css'
 
-    assert_equal 'text/css', response.headers['Content-Type']
-    assert_match 'body { background: url(/lib/avatar.png);'.squish, response.body.squish
-  end
+  #   assert_equal 'text/css', response.headers['Content-Type']
+  #   assert_match 'body { background: url(/lib/avatar.png);'.squish, response.body.squish
+  # end
 
   test 'javascript' do
     get '/app/views/layouts/application.js'
@@ -99,15 +99,6 @@ class ProxyTest < ActionDispatch::IntegrationTest
     assert_equal 'application/javascript', response.headers['Content-Type']
     assert_match %(loadStyle_default("/node_modules/react-day-picker/lib/style.css");),
                  response.body
-  end
-
-  test 'javascript with css import' do
-    get '/lib/with_css_import.js'
-
-    assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match %(loadStyle_default("/lib/reset.css");), response.body
-    assert_match %(loadStyle_default("/lib/reset.css");), response.body
-    assert_match %(console.log("/lib/with_css_import.js");), response.body
   end
 
   test 'javascript with image import' do

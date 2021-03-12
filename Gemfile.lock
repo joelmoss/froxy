@@ -45,6 +45,7 @@ GEM
     minitest (5.14.3)
     minitest-focus (1.2.1)
       minitest (>= 4, < 6)
+    minitest-snapshots (0.3.0)
     nio4r (2.5.5)
     nokogiri (1.11.1)
       mini_portile2 (~> 2.5.0)
@@ -103,6 +104,7 @@ DEPENDENCIES
   froxy!
   minitest (~> 5.0)
   minitest-focus
+  minitest-snapshots
   puma
   rake (~> 13.0)
   rubocop

@@ -1,6 +1,7 @@
-@import "./reset.css";
-@import "/app/views/layouts/application.css";
+@import './reset.css';
+@import '/lib/some.css';
 
 body {
   color: red;
+  background: url('./avatar.png');
 }

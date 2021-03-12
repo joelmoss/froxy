@@ -2,6 +2,8 @@
 
 require 'rails/railtie'
 
+POSTCSS_CONFIG_CLI = File.expand_path('../../bin/postcss_config.js', __dir__)
+
 module Froxy
   class Railtie < ::Rails::Railtie
     config.froxy = ActiveSupport::OrderedOptions.new
@@ -10,6 +12,7 @@ module Froxy
       options = app.config.froxy
 
       options.use_proxy = true if options.use_proxy.nil?
+      options.use_postcss = system(POSTCSS_CONFIG_CLI, Rails.root.to_s) if options.use_postcss.nil?
       options.use_esbuild = true if options.use_esbuild.nil?
       options.side_load_assets = true if options.side_load_assets.nil?
     end

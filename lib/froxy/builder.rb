@@ -9,9 +9,11 @@ module Froxy
   class Builder
     include ActiveSupport::Benchmarkable
 
+    CLIS = {
+      esbuild: File.expand_path('../../bin/esbuild.js', __dir__),
+      postcss: File.expand_path('../../bin/postcss.js', __dir__)
+    }
     BUILD_PATH = Rails.root.join('public/froxy/build').freeze
-    ESBUILD_CLI = File.expand_path('../../bin/esbuild.js', __dir__)
-    POSTCSS_CLI = File.expand_path('../../bin/postcss.js', __dir__)
     FALLTHRU_TYPES = /\.(png|gif|jpeg|jpg|svg|ico|webp|avif)$/i.freeze
     SOURCEMAP_TYPES = /\.(js|css)\.map$/i.freeze
     BUILDABLE_TYPES = /\.(js|jsx|css)$/i.freeze
@@ -47,7 +49,6 @@ module Froxy
 
       # Return if path is not clean or readable.
       return unless (path = clean_path(request.path_info))
-      return unless file_readable?(path)
 
       case path
       when BUILDABLE_POSTCSS_TYPES then build_with_postcss request, path
@@ -56,19 +57,39 @@ module Froxy
     end
 
     def build_with_esbuild(request, path)
+      return unless file_readable?(path)
       return @root_fs.call(request.env) unless Rails.application.config.froxy.use_esbuild
 
-      path_to_file(*build(request, path, ESBUILD_CLI))
+      path_to_file(*build(request, path, :esbuild))
     end
 
+    # Build the given `path` with PostCSS.
+    #
+    # If the request is for a CSS file, and a referer is given which matches the request scheme
+    # and host, and is JS, then we can assume that the request is from a JS import (ES Module).
+    # We then treat this as a CSS module, and build the requested CSS through the postcss builder,
+    # but as JS. This is done by appending `.js` to the path so that the builder will return a JS
+    # module.
     def build_with_postcss(request, path)
-      request.path_info = path
-      path_to_response(*build(request, path, POSTCSS_CLI)).finish
+      return unless file_readable?(path)
+      return @root_fs.call(request.env) unless Rails.application.config.froxy.use_postcss
+
+      response = build(request, imported_from_js?(request) ? "#{path}.js" : path, :postcss)
+      path_to_response(*response).finish
+    end
+
+    # Returns true if the `request` has been imported as a JS module.
+    def imported_from_js?(request)
+      return false unless request.referer
+
+      referer = URI(request.referer)
+      referer.scheme == request.scheme && referer.host == request.host &&
+        referer.path.end_with?('.js')
     end
 
     def build(request, path, cmd)
-      benchmark logging_message(request) do
-        stdout, stderr, status = Open3.capture3(cmd, Rails.root.to_s, path)
+      benchmark logging_message(request, cmd) do
+        stdout, stderr, status = Open3.capture3(CLIS[cmd], Rails.root.to_s, path)
 
         if status.success?
           raise "[froxy] build failed: #{stderr}" unless stderr.empty?
@@ -91,9 +112,12 @@ module Froxy
       ::Rack::Mime.mime_type(::File.extname(path), nil) || 'text/plain'
     end
 
-    def logging_message(request)
-      format '[froxy] "%s" for %s at %s', request.path_info, request.ip, Time.now.to_default_s
+    # rubocop:disable Style/FormatStringToken
+    def logging_message(request, cmd)
+      format '[froxy] Built /%s with %s for %s at %s', request.path_info, cmd, request.ip,
+             Time.now.to_default_s
     end
+    # rubocop:enable Style/FormatStringToken
 
     def path_to_file(request, path, _stdout)
       ext = Pathname.new(path).extname
