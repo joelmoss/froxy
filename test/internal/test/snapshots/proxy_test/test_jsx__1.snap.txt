@@ -1,0 +1,12 @@
+// app/components/link.jsx
+import React from "https://cdn.skypack.dev/react";
+import styles from "/app/components/link.css";
+function link_default() {
+  return /* @__PURE__ */ React.createElement("a", {
+    className: styles.link,
+    href: "https://github.com/joelmoss/froxy"
+  }, "I'm a Link!");
+}
+export {
+  link_default as default
+};

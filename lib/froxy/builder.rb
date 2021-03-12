@@ -114,7 +114,7 @@ module Froxy
 
     # rubocop:disable Style/FormatStringToken
     def logging_message(request, cmd)
-      format '[froxy] Built /%s with %s for %s at %s', request.path_info, cmd, request.ip,
+      format '[froxy] Built %s with %s for %s at %s', request.path_info, cmd, request.ip,
              Time.now.to_default_s
     end
     # rubocop:enable Style/FormatStringToken

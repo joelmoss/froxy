@@ -64,17 +64,7 @@ class ProxyTest < ActionDispatch::IntegrationTest
     get '/app/components/link.jsx'
 
     assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_equal %(
-      // app/components/link.jsx
-      function link_default() {
-        return /* @__PURE__ */ React.createElement("a", {
-          href: "https://github.com/joelmoss/froxy"
-        }, "I'm a Link!");
-      }
-      export {
-        link_default as default
-      };
-    ).squish, response.body.squish
+    assert_matches_snapshot response.body
   end
 
   test 'javascript with import' do

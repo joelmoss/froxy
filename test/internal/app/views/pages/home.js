@@ -11,3 +11,12 @@
 // console.log('app/views/pages/home.js')
 
 // confetti()
+
+import { render } from 'https://cdn.skypack.dev/react-dom'
+import React, { createElement } from 'https://cdn.skypack.dev/react'
+
+import Link from '/app/components/link.jsx'
+
+const rootEle = document.createElement('div')
+document.body.append(rootEle)
+render(createElement(Link), rootEle)
