@@ -84,7 +84,7 @@ module Froxy
 
       referer = URI(request.referer)
       referer.scheme == request.scheme && referer.host == request.host &&
-        referer.path.end_with?('.js')
+        referer.path.end_with?('.js', 'jsx')
     end
 
     def build(request, path, cmd)
