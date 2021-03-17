@@ -1,0 +1,11 @@
+// app/views/layouts/application.js
+console.log("app/views/layouts/application.js");
+
+// app/views/layouts/_shared.js
+console.log("app/views/layouts/_shared.js");
+
+// lib/common.js
+console.log("lib/common.js");
+
+// lib/with_import.js
+console.log("/lib/with_import.js");

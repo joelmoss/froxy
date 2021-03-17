@@ -15,15 +15,16 @@ const rootPlugin = require('../lib/froxy/esbuild/plugins/root')
 const buildOptions = {
   absWorkingDir: cwd,
   entryPoints: [entryPoint],
-  bundle: true,
   target: config.target,
   minify: config.minify,
   inject: config.inject,
   sourcemap: config.sourcemap,
   format: 'esm',
+  bundle: true,
   splitting: true,
   outdir: 'public/froxy/build',
   outbase: '.',
+  metafile: true,
   logLevel: 'error',
   define: {
     global: 'globalThis',
@@ -35,6 +36,11 @@ const buildOptions = {
 
 config.ignore && buildOptions.plugins.unshift(ignorePlugin)
 
-esbuild.build(buildOptions).catch(() => {
-  process.exit(1)
-})
+esbuild
+  .build(buildOptions)
+  .then(result => {
+    console.log(result.metafile)
+  })
+  .catch(() => {
+    process.exit(1)
+  })

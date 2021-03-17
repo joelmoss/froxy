@@ -71,24 +71,7 @@ class ProxyTest < ActionDispatch::IntegrationTest
     get '/lib/with_import.js'
 
     assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_equal %(
-      // app/views/layouts/application.js
-      console.log("app/views/layouts/application.js");
-
-      // lib/common.js
-      console.log("lib/common.js");
-
-      // lib/with_import.js
-      console.log("/lib/with_import.js");
-    ).squish, response.body.squish
-  end
-
-  test 'javascript with node_modules CSS import' do
-    get '/lib/with_node_modules_css_import.js'
-
-    assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match %(loadStyle_default("/node_modules/react-day-picker/lib/style.css");),
-                 response.body
+    assert_matches_snapshot response.body
   end
 
   test 'javascript with image import' do
@@ -112,11 +95,7 @@ class ProxyTest < ActionDispatch::IntegrationTest
     get '/lib/with_node_module_alias_import.js'
 
     assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match %(
-      // lib/with_node_module_alias_import.js
-      console.log(isArray_default([]));
-      console.log("/lib/with_node_module_alias_import.js");
-    ).squish, response.body.squish
+    assert_matches_snapshot response.body
   end
 
   test 'javascript with local alias import' do

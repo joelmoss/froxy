@@ -14,14 +14,6 @@ class PostcssBuilderTest < ActionDispatch::IntegrationTest
     ).squish, response.body.squish
   end
 
-  test 'javascript with node_modules CSS import' do
-    get '/lib/with_node_modules_css_import.js'
-
-    assert_equal 'application/javascript', response.headers['Content-Type']
-    assert_match %(loadStyle_default("/node_modules/react-day-picker/lib/style.css");),
-                 response.body
-  end
-
   test 'javascript with CSS module import' do
     get '/lib/some.css',
         headers: { Referer: 'http://www.example.com/lib/with_css_module_import.js' }
