@@ -4,6 +4,7 @@
   "private": true,
   "froxy": {
     "minify": false,
+    "bundle": true,
     "sourcemap": false,
     "target": "es2016",
     "aliases": {

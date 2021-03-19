@@ -4,7 +4,7 @@ const [, , cwd, entryPoint] = process.argv
 
 const esbuild = require(require.resolve('esbuild', { paths: [cwd] }))
 
-const { resolve, config } = require('../lib/froxy/esbuild/utils')
+const { config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
 const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')
 const cssPlugin = require('../lib/froxy/esbuild/plugins/css')
@@ -23,8 +23,8 @@ const buildOptions = {
   minify: config.minify,
   inject: config.inject,
   sourcemap: config.sourcemap,
-  format: 'esm',
   bundle: true,
+  format: 'esm',
   splitting: true,
   outdir: 'public/froxy/build',
   outbase: '.',
@@ -39,6 +39,7 @@ const buildOptions = {
 }
 
 config.ignore && buildOptions.plugins.unshift(ignorePlugin)
+!config.bundle && buildOptions.plugins.push(nobundlePlugin)
 
 esbuild
   .build(buildOptions)
