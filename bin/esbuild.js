@@ -6,11 +6,14 @@ const esbuild = require(require.resolve('esbuild', { paths: [cwd] }))
 
 const { resolve, config } = require('../lib/froxy/esbuild/utils')
 const loadStylePlugin = require('../lib/froxy/esbuild/plugins/load_style')
-const ignorePlugin = require('../lib/froxy/esbuild/plugins/ignore')
 const aliasPlugin = require('../lib/froxy/esbuild/plugins/alias')
 const cssPlugin = require('../lib/froxy/esbuild/plugins/css')
 const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')
 const rootPlugin = require('../lib/froxy/esbuild/plugins/root')
+const ignorePlugin = require('../lib/froxy/esbuild/plugins/ignore')
+
+const skypackPlugin = require('../lib/froxy/esbuild/plugins/skypack')
+const debugPlugin = require('../lib/froxy/esbuild/plugins/debug')
 
 const buildOptions = {
   absWorkingDir: cwd,
@@ -40,6 +43,7 @@ esbuild
   .build(buildOptions)
   .then(result => {
     console.log(result.metafile)
+    // require('fs').writeFileSync('meta.json', JSON.stringify(result.metafile))
   })
   .catch(() => {
     process.exit(1)
