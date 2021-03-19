@@ -12,6 +12,7 @@ const imagesPlugin = require('../lib/froxy/esbuild/plugins/images')
 const rootPlugin = require('../lib/froxy/esbuild/plugins/root')
 const ignorePlugin = require('../lib/froxy/esbuild/plugins/ignore')
 
+const nobundlePlugin = require('../lib/froxy/esbuild/plugins/nobundle')
 const skypackPlugin = require('../lib/froxy/esbuild/plugins/skypack')
 const debugPlugin = require('../lib/froxy/esbuild/plugins/debug')
 

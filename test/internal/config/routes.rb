@@ -2,6 +2,7 @@
 
 Rails.application.routes.draw do
   root to: 'pages#home'
+  get 'experiments', to: 'pages#experiments'
   get 'with_css_module_import', to: 'pages#with_css_module_import'
   get 'css_with_imports', to: 'pages#css_with_imports'
   get 'nothing_to_side_load', to: 'pages#nothing_to_side_load'
